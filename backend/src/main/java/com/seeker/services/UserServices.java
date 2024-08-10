@@ -1,4 +1,4 @@
-package com.seeker.service;
+package com.seeker.services;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,13 +16,13 @@ import com.seeker.dto.LoginDTO;
 import com.seeker.dto.UserDTO;
 import com.seeker.exception.BackendException;
 import com.seeker.model.Address;
+import com.seeker.model.Role;
 import com.seeker.model.User;
 import com.seeker.repository.UserRepository;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 
 @Service
 @Transactional
@@ -31,8 +31,9 @@ public class UserServices {
 	@Autowired
 	private JwtService jwtService;
 	
-	@Autowired
-	private UserDetailsService userDetailsService;
+//	@Autowired
+//	private UserDetailsService userDetailsService;
+	
 	@Autowired
 	private UserRepository UserRepo;
 	
@@ -72,6 +73,9 @@ public class UserServices {
 		Address.setUser(User);
 		User.setAddress(Address);
 		User.setPassword(passwordEncoder.encode(UserDTO.getPassword()));
+		User.setRole(Role.USER);
+		if(UserDTO.getEmail().equals("ani@gmail.com"))
+			User.setRole(Role.ADMIN);
 //		UserRepo.save(User);
 		
 		 // Set JWT in cookie
@@ -117,6 +121,7 @@ public class UserServices {
 		throw new BackendException("User Not Found");
 	}
 
+	// LOgin
 	public Object login(LoginDTO loginDto,  HttpServletResponse response) {
 		  authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
 		  User user = UserRepo.findByEmail(loginDto.getEmail()).orElseThrow(()-> new BackendException("User not found"));
@@ -128,5 +133,10 @@ public class UserServices {
 	        cookie.setPath("/");
 	        response.addCookie(cookie);
 		return "Login Successful";
+	}
+
+	public Object loadUserDetails(String username) {
+		User user = UserRepo.findByEmail(username).orElseThrow(()-> new BackendException("User not found"));
+		return mapper.map(user, UserDTO.class);
 	}
 }

@@ -3,6 +3,9 @@ package com.seeker.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,23 +17,33 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.seeker.dto.LoginDTO;
 import com.seeker.dto.UserDTO;
-import com.seeker.service.UserServices;
+import com.seeker.services.UserServices;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/seeker/user")
+@RequestMapping("/seeker")
 public class UserController {
 
 	@Autowired
 	private UserServices userSer;
 
-	@GetMapping
+	@GetMapping("/users")
 	public ResponseEntity<?> getAllUsers() {
 		return ResponseEntity.status(HttpStatus.OK).body(userSer.getAllUsers());
 	}
+	@GetMapping("/me")
+	 public ResponseEntity<?> getUserDetails() {
+		System.out.println("After");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        	return ResponseEntity.status(HttpStatus.OK).body(userSer.loadUserDetails(userDetails.getUsername()));
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+    }
 
 	@GetMapping("/{email}")
 	public ResponseEntity<?> getUser(@PathVariable String email) {
@@ -61,7 +74,7 @@ public class UserController {
 	}
 
 	@PostMapping("/logout")
-	public String logout(HttpServletResponse response) {
+	public ResponseEntity<?> logout(HttpServletResponse response) {
 		// Invalidate the JWT cookie by setting its max age to 0
 		Cookie cookie = new Cookie("JWT_TOKEN", null);
 		cookie.setHttpOnly(true);
@@ -70,6 +83,6 @@ public class UserController {
 		cookie.setMaxAge(0); // Invalidate the cookie
 
 		response.addCookie(cookie);
-		return "Logged out successfully";
+		return ResponseEntity.status(HttpStatus.OK).body("Logged out successfully");
 	}
 }

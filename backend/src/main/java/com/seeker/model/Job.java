@@ -56,5 +56,5 @@ public class Job {
     private List<User> appliedUsers = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    private JobStatus status;
+    private JobStatus status= JobStatus.POSTED;
 }

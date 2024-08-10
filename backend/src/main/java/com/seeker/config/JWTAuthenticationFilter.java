@@ -34,31 +34,48 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 			@NonNull FilterChain filterChain
 	)throws ServletException, IOException {
 		final String userEmail;
-		final String jwt;
-		final String authHeader = request.getHeader("Authorization");
-		if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-			filterChain.doFilter(request, response);
-			return;
-		}
-		
-		jwt = authHeader.substring(7);
+//		final String jwt;
+//		final String authHeader = request.getHeader("Authorization");
+//		if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+//			filterChain.doFilter(request, response);
+//			return;
+//		}
+//		
+//		jwt = authHeader.substring(7);
 //		
 		
-//		String jwt = null;
-//        Cookie[] cookies = request.getCookies();
-//        if (cookies != null) {
-//            for (Cookie cookie : cookies) {
-//                if ("JWT_TOKEN".equals(cookie.getName())) {
-//                    jwt = cookie.getValue();
-//                }
-//            }
-//        }else
-//        	return;
+        
+		String COOKIE_NAME = "JWT_TOKEN";
+		String jwt = null;
+
+		// Get all cookies from the request
+		Cookie[] cookies = request.getCookies();
+
+		if (cookies != null) {
+		    for (Cookie cookie : cookies) {
+		        // Check if the cookie name matches the expected name
+		        if (COOKIE_NAME.equals(cookie.getName())) {
+		            // Retrieve the JWT from the cookie value
+		            jwt = cookie.getValue();
+		            break;
+		        }
+		    }
+		}
+
+		// If JWT is not found, continue the filter chain and return
+		if (jwt == null) {
+        	System.out.println("JWT NOT FOUND");
+		    filterChain.doFilter(request, response);
+		    return;
+		}
+
+		
 		System.out.println(jwt);
                
-		userEmail = jwtService.extractUsername(jwt) ;
+		userEmail = jwtService.extractUsername(jwt) ;  // JWT TOKEN TIMEOUT exception needs to be  handled
 		if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 			UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+			
 		System.out.println(userDetails.getUsername());
 			
 			if(jwtService.isTokenValid(jwt, userDetails)) {

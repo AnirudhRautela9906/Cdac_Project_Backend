@@ -37,19 +37,17 @@ public class JobDTO {
 	@NotBlank(message = "Long Description cannot be blank")
     private String longDesc;
 
-	private User creator;
+//	private User creator;
 	
-	private String creatorEmail;
-
 	private Double price;
 
 	private Address jobLocation;
 
 	private User assignedUser;
 
-	private LocalDateTime jobPostDateTime = LocalDateTime.now();
+	private LocalDateTime jobPostDateTime;
 
-	private List<User> appliedUsers = new ArrayList<>();
+	private List<User> appliedUsers;
 
-	private JobStatus status= JobStatus.POSTED;
+	private JobStatus status;
 }

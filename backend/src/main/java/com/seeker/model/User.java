@@ -3,7 +3,6 @@ package com.seeker.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -50,13 +49,13 @@ public class User implements UserDetails {
     private List<Job> jobsPosted = new ArrayList<>();
 
     @OneToMany(mappedBy = "assignedUser")
-    private Set<Job> assignedJobs;
+    private List<Job> assignedJobs;
 
     @OneToOne(cascade = CascadeType.ALL,mappedBy = "user")
     private Address address;
     
     @Enumerated(EnumType.STRING)
-    private Role role=Role.USER;
+    private Role role;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {

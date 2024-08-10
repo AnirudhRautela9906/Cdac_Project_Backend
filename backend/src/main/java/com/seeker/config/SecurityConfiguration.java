@@ -9,6 +9,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.seeker.model.Role;
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -25,8 +27,16 @@ public class SecurityConfiguration {
 			.csrf()
 			.disable()
 			.authorizeHttpRequests()
-			.requestMatchers("/seeker/user/**")
-			.permitAll()
+//			User Mapping
+			.requestMatchers("/seeker/register","/seeker/login","/seeker/me").permitAll()
+			.requestMatchers("/seeker/users").hasAuthority(Role.ADMIN.name())
+			
+//			Job Mapping
+			.requestMatchers("/seeker/job").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+			.requestMatchers("/seeker/job/create").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+			.requestMatchers("/seeker/job").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+			.requestMatchers("/seeker/job").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+
 			.anyRequest()
 			.authenticated()
 			.and()

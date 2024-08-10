@@ -1,11 +1,6 @@
 package com.seeker.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import com.seeker.model.Address;
-import com.seeker.model.Job;
+import com.seeker.model.Role;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -50,6 +45,8 @@ public class UserDTO {
 
 	@NotNull(message = "Age cannot be null")
 	private int age;
+	
+	private Role role;
 
 
 //    private List<Job> jobsApplied = new ArrayList<>();
