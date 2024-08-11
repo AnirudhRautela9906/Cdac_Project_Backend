@@ -51,8 +51,13 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "assignedUser")
     private List<Job> assignedJobs;
 
+    
+    
     @OneToOne(cascade = CascadeType.ALL,mappedBy = "user")
     private Address address;
+    
+    
+    
     
     @Enumerated(EnumType.STRING)
     private Role role;

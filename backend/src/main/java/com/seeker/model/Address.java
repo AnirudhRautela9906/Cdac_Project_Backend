@@ -28,5 +28,6 @@ public class Address {
     private User user;
 
     @OneToOne
+    @JoinColumn(name = "job_id")
     private Job jobId;
 }

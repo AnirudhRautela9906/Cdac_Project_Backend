@@ -43,14 +43,18 @@ public class JobServices {
 				.collect(Collectors.toList());
 	}
 	
-	public Object createJob(@Valid JobDTO jobDto, HttpServletResponse response) {
+//	Create Job
+	public Object createJob(JobDTO jobDto, HttpServletResponse response) {
 		User user = null;
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             user = userRepo.findByEmail(userDetails.getUsername()).orElseThrow(() -> new BackendException("User not Found"));
         }
+
+        System.out.println("JOB DTO"+jobDto);
         Job job = mapper.map(jobDto, Job.class);
+        System.out.println("JOB MODEL"+job);
         Address Address = job.getJobLocation();
 		
 		// Important
@@ -65,13 +69,38 @@ public class JobServices {
 	}
 
 	public Object getJob(String id) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return mapper.map(jobRepo.findById(Long.parseLong(id)).orElseThrow(() -> new BackendException("Job not Found")),JobDTO.class);
 	}
 
+//	Edit Job
 	public Object updateJob(@Valid String id, JobDTO jobDto) {
-		// TODO Auto-generated method stub
+		
 		return null;
+	}
+	
+//	Apply Job
+	public Object applyJob(String id) {
+		User user = null;
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            user = userRepo.findByEmail(userDetails.getUsername()).orElseThrow(() -> new BackendException("User not Found"));
+        }
+        Job job = jobRepo.findById(Long.parseLong(id)).orElseThrow(() -> new BackendException("Job not Found"));
+        
+        if(job.getAppliedUsers().contains(user))
+        	throw new BackendException("Already Applied");
+        
+        List<Job> jobsList = user.getJobsApplied();
+        jobsList.add(job);
+        user.setJobsApplied(jobsList);
+        List<User> usersList = job.getAppliedUsers();
+        usersList.add(user);
+        job.setAppliedUsers(usersList);
+        
+        jobRepo.save(job);
+		return "Job Applied";
 	}
 
 

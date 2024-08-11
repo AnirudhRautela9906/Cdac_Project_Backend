@@ -13,8 +13,8 @@ import lombok.ToString;
 
 @Data
 @ToString
-public class JobDTO {
-
+public class JobPostedDTO {
+	
 	private Long jobId;
 	@NotEmpty(message = "Short Description cannot be empty")
 	@NotNull(message = "Short Description cannot be null")
@@ -26,7 +26,7 @@ public class JobDTO {
 	@NotBlank(message = "Long Description cannot be blank")
     private String longDesc;
 
-	private RegisterDTO creator;
+//	private RegisterDTO creator;
 	
 	private Double price;
 

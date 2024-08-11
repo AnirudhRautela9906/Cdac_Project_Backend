@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.seeker.dto.LoginDTO;
-import com.seeker.dto.UserDTO;
+import com.seeker.dto.RegisterDTO;
 import com.seeker.services.UserServices;
 
 import jakarta.servlet.http.Cookie;
@@ -36,7 +36,6 @@ public class UserController {
 	}
 	@GetMapping("/me")
 	 public ResponseEntity<?> getUserDetails() {
-		System.out.println("After");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -51,7 +50,7 @@ public class UserController {
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO userDto, HttpServletResponse response) {
+	public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterDTO userDto, HttpServletResponse response) {
 //		System.out.println("dsfds");
 //		return ResponseEntity.ok("sd");
 		return ResponseEntity.status(HttpStatus.CREATED).body(userSer.registerUser(userDto, response));
@@ -64,7 +63,7 @@ public class UserController {
 	}
 
 	@PutMapping("/{email}")
-	public ResponseEntity<?> updateUser(@Valid @PathVariable String email, @RequestBody UserDTO userDto) {
+	public ResponseEntity<?> updateUser(@Valid @PathVariable String email, @RequestBody RegisterDTO userDto) {
 		return ResponseEntity.status(HttpStatus.OK).body(userSer.updateUser(email, userDto));
 	}
 

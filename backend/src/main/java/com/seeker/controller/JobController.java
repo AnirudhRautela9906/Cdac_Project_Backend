@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.seeker.dto.JobDTO;
-import com.seeker.dto.UserDTO;
+import com.seeker.dto.RegisterDTO;
 import com.seeker.services.JobServices;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,19 +30,25 @@ public class JobController {
 		return ResponseEntity.status(HttpStatus.OK).body(jobSer.getAllJobs());
 	}
 	
-	@GetMapping("/{id}")
-	public ResponseEntity<?> getJob(@PathVariable String id) {
-		return ResponseEntity.status(HttpStatus.OK).body(jobSer.getJob(id));
-	}
-	
 	@PostMapping("/create")
 	public ResponseEntity<?> createJob(@Valid @RequestBody JobDTO jobDto, HttpServletResponse response) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(jobSer.createJob(jobDto, response));
 	}
 	
-	@PutMapping("/{id}")
+	@GetMapping("/{id}")
+	public ResponseEntity<?> getJob(@PathVariable String id) {
+		return ResponseEntity.status(HttpStatus.OK).body(jobSer.getJob(id));
+	}
+	
+	
+	@PutMapping("/update/{id}")
 	public ResponseEntity<?> updateJob(@Valid @PathVariable String id, @RequestBody JobDTO jobDto) {
 		return ResponseEntity.status(HttpStatus.OK).body(jobSer.updateJob(id, jobDto));
+	}
+	
+	@PutMapping("/apply/{id}")
+	public ResponseEntity<?> applyJob(@Valid @PathVariable String id) {
+		return ResponseEntity.status(HttpStatus.OK).body(jobSer.applyJob(id));
 	}
 	
 	

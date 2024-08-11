@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,10 +19,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 @Entity
 @Table(name = "jobs")
+@ToString
 public class Job {
     @Id
     @Column(name = "job_id")
@@ -42,7 +42,6 @@ public class Job {
     private Double price;
 
     @OneToOne(cascade = CascadeType.ALL ,mappedBy = "jobId")
-    @JsonManagedReference
     private Address jobLocation;
 
     @ManyToOne

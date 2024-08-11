@@ -34,7 +34,8 @@ public class SecurityConfiguration {
 //			Job Mapping
 			.requestMatchers("/seeker/job").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
 			.requestMatchers("/seeker/job/create").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
-			.requestMatchers("/seeker/job").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+			.requestMatchers("/seeker/job/update/{id}").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+			.requestMatchers("/seeker/job/apply/{id}").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
 			.requestMatchers("/seeker/job").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
 
 			.anyRequest()

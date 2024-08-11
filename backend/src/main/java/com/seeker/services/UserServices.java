@@ -7,17 +7,22 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.seeker.config.JwtService;
+import com.seeker.dto.AddressDTO;
+import com.seeker.dto.JobDTO;
+import com.seeker.dto.JobPostedDTO;
 import com.seeker.dto.LoginDTO;
-import com.seeker.dto.UserDTO;
+import com.seeker.dto.MeDTO;
+import com.seeker.dto.RegisterDTO;
 import com.seeker.exception.BackendException;
 import com.seeker.model.Address;
+import com.seeker.model.Job;
 import com.seeker.model.Role;
 import com.seeker.model.User;
+import com.seeker.repository.JobRepository;
 import com.seeker.repository.UserRepository;
 
 import jakarta.servlet.http.Cookie;
@@ -44,24 +49,27 @@ public class UserServices {
 	private ModelMapper mapper;
 	
 	@Autowired
+	private JobRepository jobRepo;
+	
+	@Autowired
 	private PasswordEncoder passwordEncoder; 
 	
 	
 	// Admin ==> List of all Users  
-	public List<UserDTO> getAllUsers(){
+	public List<RegisterDTO> getAllUsers(){
 		return UserRepo.findAll().stream()
-				.map(e-> mapper.map(e, UserDTO.class))
+				.map(e-> mapper.map(e, RegisterDTO.class))
 				.collect(Collectors.toList());
 	}
 	
 	// One user details
-	public UserDTO getUser(String email) {
+	public RegisterDTO getUser(String email) {
 		return mapper.map(UserRepo.findByEmail(email).orElseThrow(() -> new BackendException("User not Found")),
-				UserDTO.class);
+				RegisterDTO.class);
 	}
 
 	// Create User
-	public UserDTO registerUser(UserDTO UserDTO,  HttpServletResponse response) {
+	public RegisterDTO registerUser(RegisterDTO UserDTO,  HttpServletResponse response) {
 //	public UserDTO registerUser(UserDTO UserDTO) {
 		System.out.println(UserDTO);
 		
@@ -93,12 +101,12 @@ public class UserServices {
 //        		.build();
         
 		
-		return mapper.map(UserRepo.save(User), UserDTO.class);
+		return mapper.map(UserRepo.save(User), RegisterDTO.class);
 	}
 	
 	
 	// Update User details
-	public UserDTO updateUser(String email,UserDTO UserDTO) {
+	public RegisterDTO updateUser(String email,RegisterDTO UserDTO) {
 		User User = mapper.map(UserDTO, User.class);
 		if (UserRepo.existsById(email)) {
 			User.setEmail(email);
@@ -107,7 +115,7 @@ public class UserServices {
 //			User.setStatus(UserDTO.getStatus());
 			
 			UserRepo.save(User);			
-			return mapper.map(User, UserDTO.class);
+			return mapper.map(User, RegisterDTO.class);
 		}
 		throw new BackendException("User Not Found");
 	}
@@ -137,6 +145,41 @@ public class UserServices {
 
 	public Object loadUserDetails(String username) {
 		User user = UserRepo.findByEmail(username).orElseThrow(()-> new BackendException("User not found"));
-		return mapper.map(user, UserDTO.class);
+		MeDTO meDTO = new MeDTO();
+		
+		List<JobPostedDTO> jobPostedDtoList = user.getJobsPosted().stream()
+		.map(e-> mapper.map(e, JobPostedDTO.class))
+		.collect(Collectors.toList());
+		
+		
+//		List<Job> jobs = user.getJobsPosted();
+//		Job job = new Job();
+//		
+//		List<RegisterDTO> jobApplied = job.getAppliedUsers().stream()
+//				.map(e-> mapper.map(e, RegisterDTO.class))
+//				.collect(Collectors.toList());
+		
+		
+//		List<Stream<RegisterDTO>> jobApplied = jobs.stream()
+//				.map(job->	job.getAppliedUsers().stream()
+//				.map(e-> mapper.map(e, RegisterDTO.class)))
+//				.collect(Collectors.toList());
+		
+//		MeDTO meDto = mapper.map(user,MeDTO.class );
+		meDTO.setJobsPosted(jobPostedDtoList);
+//		 mapper.map(user,MeDTO.class );
+		
+		meDTO.setName(user.getName());
+		meDTO.setEmail(user.getEmail());
+		meDTO.setPassword(user.getPassword());
+		meDTO.setAadhar(user.getAadhar());
+		meDTO.setAge(user.getAge());
+		meDTO.setRole(user.getRole());
+		meDTO.setAddress(mapper.map(user.getAddress(), AddressDTO.class));
+		
+		
+		return meDTO;
+
+		
 	}
 }
