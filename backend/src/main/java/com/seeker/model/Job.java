@@ -35,7 +35,7 @@ public class Job {
     
     private String longDesc;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "creator_email")
     private User creator;
 

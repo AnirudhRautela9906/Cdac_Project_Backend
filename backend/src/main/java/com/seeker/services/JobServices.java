@@ -122,8 +122,12 @@ public class JobServices {
 
 	
 	
-
-
+	//Job Assigned to a user by the job poster
+	public Object assignedUserForJob(String email) {
+		User user = userRepo.findByEmail(email).orElseThrow(()-> new BackendException("User Not Found"));
+		
+		return null;
+	}
 
 
 
