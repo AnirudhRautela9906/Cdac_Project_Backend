@@ -1,5 +1,6 @@
 package com.seeker.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -7,6 +8,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,13 +18,17 @@ import com.seeker.config.JwtService;
 import com.seeker.dto.job.JobAppliedDTO;
 import com.seeker.dto.job.JobPostedDTO;
 import com.seeker.dto.remaining.AddressDTO;
+import com.seeker.dto.remaining.NotificationDTO;
+import com.seeker.dto.remaining.TransactionDTO;
 import com.seeker.dto.user.LoginDTO;
 import com.seeker.dto.user.MeDTO;
 import com.seeker.dto.user.RegisterDTO;
 import com.seeker.exception.BackendException;
 import com.seeker.model.Address;
 import com.seeker.model.Job;
+import com.seeker.model.Notification;
 import com.seeker.model.Role;
+import com.seeker.model.Transaction;
 import com.seeker.model.User;
 import com.seeker.repository.UserRepository;
 
@@ -39,7 +47,7 @@ public class UserServices {
 //	private UserDetailsService userDetailsService;
 	
 	@Autowired
-	private UserRepository UserRepo;
+	private UserRepository userRepo;
 	
 	@Autowired
 	private AuthenticationManager authenticationManager; 
@@ -54,14 +62,14 @@ public class UserServices {
 	
 	// Admin ==> List of all Users  
 	public List<RegisterDTO> getAllUsers(){
-		return UserRepo.findAll().stream()
+		return userRepo.findAll().stream()
 				.map(e-> mapper.map(e, RegisterDTO.class))
 				.collect(Collectors.toList());
 	}
 	
 	// One user details
 	public RegisterDTO getUser(String email) {
-		return mapper.map(UserRepo.findByEmail(email).orElseThrow(() -> new BackendException("User not Found")),
+		return mapper.map(userRepo.findByEmail(email).orElseThrow(() -> new BackendException("User not Found")),
 				RegisterDTO.class);
 	}
 
@@ -101,38 +109,31 @@ public class UserServices {
         
 //		return mapper.map(UserRepo.save(User), RegisterDTO.class);
 
-        User = UserRepo.save(User);
+        User = userRepo.save(User);
         return loadUserDetails(User.getEmail()) ;
 	}
 	
 	
-	// Update User details
-	public RegisterDTO updateUser(String email,RegisterDTO registerDTO) {
-		User User = mapper.map(registerDTO, User.class);
-		if (UserRepo.existsById(email)) {
-			User.setEmail(email);
-//			User.setIssue_details(RegisterDTO.getIssue_details());
-//			User.setResolution_details(RegisterDTO.getResolution_details());
-//			User.setStatus(RegisterDTO.getStatus());
-//			meDTO.setName(user.getName());
-//			meDTO.setEmail(user.getEmail());
-//			meDTO.setPassword(user.getPassword());
-//			meDTO.setAadhar(user.getAadhar());
-//			meDTO.setAge(user.getAge());
-//			meDTO.setRole(user.getRole());
-//			meDTO.setAddress(mapper.map(user.getAddress(), AddressDTO.class));
-//			meDTO.setPhoneNumber(user.getPhoneNumber());
-			
-			UserRepo.save(User);			
-			return mapper.map(User, RegisterDTO.class);
-		}
-		throw new BackendException("User Not Found");
+	// Update Wallet Amount
+	public Object updateWallet(Double amount) {
+		User user = null;
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            user = userRepo.findByEmail(userDetails.getUsername()).orElseThrow(() -> new BackendException("User not Found"));
+        }
+        
+        user.setWallet(user.getWallet() + amount);
+        userRepo.save(user);
+        
+        return "Amount Updated";
+		
 	}
 	
 //	Admin ==> Delete
 	public String deleteUser(String email) {
-		if (UserRepo.existsById(email)) {
-			UserRepo.deleteById(email);
+		if (userRepo.existsById(email)) {
+			userRepo.deleteById(email);
 			return "Deleted Successfully";
 		}
 		throw new BackendException("User Not Found");
@@ -141,7 +142,7 @@ public class UserServices {
 	// LOgin
 	public Object login(LoginDTO loginDto,  HttpServletResponse response) {
 		  authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
-		  User user = UserRepo.findByEmail(loginDto.getEmail()).orElseThrow(()-> new BackendException("User not found"));
+		  User user = userRepo.findByEmail(loginDto.getEmail()).orElseThrow(()-> new BackendException("User not found"));
 		  String jwt = jwtService.generateToken(user);
 	        Cookie cookie = new Cookie("JWT_TOKEN", jwt);
 	        cookie.setHttpOnly(true);
@@ -154,7 +155,7 @@ public class UserServices {
 	}
 
 	public Object loadUserDetails(String username) {
-		User user = UserRepo.findByEmail(username).orElseThrow(()-> new BackendException("User not found"));
+		User user = userRepo.findByEmail(username).orElseThrow(()-> new BackendException("User not found"));
 		MeDTO meDTO = new MeDTO();
 		
 		meDTO.setName(user.getName());
@@ -165,6 +166,15 @@ public class UserServices {
 		meDTO.setRole(user.getRole());
 		meDTO.setAddress(mapper.map(user.getAddress(), AddressDTO.class));
 		meDTO.setPhoneNumber(user.getPhoneNumber());
+		meDTO.setWallet(user.getWallet());
+		
+		//List of notifications
+		List<NotificationDTO> notificationDTOs = new ArrayList<NotificationDTO>();
+		List<Notification> notifications = user.getNotificationList();
+		for(Notification n : notifications) {
+			notificationDTOs.add(new NotificationDTO(n.getId(),n.getMessage(),n.getJob().getTitle(), n.isRead()));
+		}
+		meDTO.setNotificationList(notificationDTOs);
 		
 		// List of jobs posted by the logged in user
 		List<JobPostedDTO> jobPostedDtoList = user.getJobsPosted().stream()
@@ -172,10 +182,22 @@ public class UserServices {
 		.collect(Collectors.toList());
 		meDTO.setJobsPosted(jobPostedDtoList);
 		
+		
 		//List of jobs applied by the logged in user
 		List<Job> jobsAppliedList = user.getJobsApplied();
 		List<JobAppliedDTO> jobsAppliedDtoList = jobsAppliedList.stream().map(e -> mapper.map(e, JobAppliedDTO.class)).collect(Collectors.toList());
 		meDTO.setJobsApplied(jobsAppliedDtoList);
+		
+		//List of jobs assigned to the logged in user
+		List<Job> jobsAssignedList = user.getAssignedJobs();
+		List<JobAppliedDTO> jobsAssignedDTOs = jobsAssignedList.stream().map(e-> mapper.map(e, JobAppliedDTO.class)).collect(Collectors.toList());
+		meDTO.setAssignedJobs(jobsAssignedDTOs);
+		
+		//List of transactions History of the logged in user
+		List<Transaction> transactions = user.getTransactions();
+		List<TransactionDTO> transactionDTOs = transactions.stream().map(t-> mapper.map(t, TransactionDTO.class)).collect(Collectors.toList());
+		meDTO.setTransactions(transactionDTOs);
+		
 		
 		
 		return meDTO;

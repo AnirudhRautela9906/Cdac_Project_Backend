@@ -5,6 +5,8 @@ import java.util.List;
 import com.seeker.dto.job.JobAppliedDTO;
 import com.seeker.dto.job.JobPostedDTO;
 import com.seeker.dto.remaining.AddressDTO;
+import com.seeker.dto.remaining.NotificationDTO;
+import com.seeker.dto.remaining.TransactionDTO;
 import com.seeker.model.Role;
 
 import jakarta.validation.constraints.NotBlank;
@@ -46,10 +48,16 @@ public class MeDTO {
 
     private List<JobPostedDTO> jobsPosted;
 
-//    private List<Job> assignedJobs;
+    private List<JobAppliedDTO> assignedJobs;
 
 	@NotNull(message = "Address cannot be null")   
     private AddressDTO address;
+	
+	private List<NotificationDTO> notificationList;
+	
+	private Double wallet;
+	
+	private List<TransactionDTO> transactions;
     
     
 

@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -56,4 +58,9 @@ public class Job {
 
     @Enumerated(EnumType.STRING)
     private JobStatus status= JobStatus.POSTED;
+    
+//    @ElementCollection
+//    @CollectionTable(name = "image_list", joinColumns = @JoinColumn(name = "job_id"))
+//    @Column(name = "image")
+//    private List<String> images = new ArrayList<String>();
 }

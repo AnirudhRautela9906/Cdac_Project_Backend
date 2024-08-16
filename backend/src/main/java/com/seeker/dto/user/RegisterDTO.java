@@ -46,7 +46,7 @@ public class RegisterDTO {
 
 
 	@NotNull(message = "Age cannot be null")
-	private int age;
+	private Integer age;
 	
 	private Role role;
 

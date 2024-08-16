@@ -33,6 +33,7 @@ public class SecurityConfiguration {
 			.requestMatchers("/seeker/getUser/{email}").hasAuthority(Role.ADMIN.name())
 			.requestMatchers("/seeker/delete/{email}").hasAuthority(Role.ADMIN.name())
 			.requestMatchers("/seeker/update/{email}").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+			.requestMatchers("/seeker/update-wallet").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
 			.requestMatchers("/seeker/logout").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
 			
 //			Job Mapping
@@ -41,6 +42,8 @@ public class SecurityConfiguration {
 			.requestMatchers("/seeker/job/create").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
 			.requestMatchers("/seeker/job/update/{id}").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
 			.requestMatchers("/seeker/job/apply/{id}").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+			.requestMatchers("/seeker/job/job-completed/{jobId}").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
+			.requestMatchers("/seeker/job/assign/{email}/{id}").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
 			.requestMatchers("/seeker/job").hasAnyAuthority(Role.ADMIN.name(), Role.USER.name())
 
 			.anyRequest()

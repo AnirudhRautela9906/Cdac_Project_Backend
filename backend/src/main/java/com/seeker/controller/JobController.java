@@ -62,5 +62,15 @@ public class JobController {
 		return ResponseEntity.status(HttpStatus.OK).body(jobSer.applyJob(id));
 	}
 	
+	@PutMapping("/assign/{email}/{jobId}")
+	public ResponseEntity<?> assignUserForJob(@PathVariable String email, @PathVariable Long jobId){
+		return ResponseEntity.status(HttpStatus.OK).body(jobSer.assignedUserForJob(email, jobId));
+	}
+	
+	@PutMapping("/job-completed/{jobId}")
+	public ResponseEntity<?> jobCompleted(@PathVariable Long jobId){
+		return ResponseEntity.status(HttpStatus.OK).body(jobSer.jobComplete(jobId));
+	}
+	
 	
 }

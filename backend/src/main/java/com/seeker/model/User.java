@@ -50,8 +50,7 @@ public class User implements UserDetails {
 
     
     @OneToMany(mappedBy = "assignedUser", fetch =  FetchType.EAGER,cascade = CascadeType.ALL)
-    private List<Job> assignedJobs;
-
+    private List<Job> assignedJobs = new ArrayList<>();
     
     
     @OneToOne(cascade = CascadeType.ALL,mappedBy = "user")
@@ -63,6 +62,14 @@ public class User implements UserDetails {
     
     @Enumerated(EnumType.STRING)
     private Role role;
+    
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<Notification> notificationList = new ArrayList<Notification>();
+    
+    private Double wallet = 1000.0;
+    
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<Transaction> transactions = new ArrayList<Transaction>(); 
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {

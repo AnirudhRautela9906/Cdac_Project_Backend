@@ -61,13 +61,13 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.OK).body(userSer.login(loginDto, response));
 	}
 
-	@PutMapping("/update/{email}")
-	public ResponseEntity<?> updateUser(@Valid @PathVariable String email, @RequestBody RegisterDTO userDto) {
-		return ResponseEntity.status(HttpStatus.OK).body(userSer.updateUser(email, userDto));
+	@PutMapping("/update-wallet")
+	public ResponseEntity<?> updateUser(@Valid @RequestBody Double amount) {
+		return ResponseEntity.status(HttpStatus.OK).body(userSer.updateWallet(amount));
 	}
 
 	@DeleteMapping("/delete/{email}")
-	public ResponseEntity<?> deleteTicket(@Valid @PathVariable String email) {
+	public ResponseEntity<?> deleteUser(@Valid @PathVariable String email) {
 		return ResponseEntity.status(HttpStatus.OK).body(userSer.deleteUser(email));
 	}
 
